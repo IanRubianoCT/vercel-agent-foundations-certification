@@ -1,3 +1,4 @@
+import { sleep } from "workflow";
 import {
   createReturn,
   getOrder,
@@ -13,6 +14,9 @@ export async function returnFlow(orderId: string, reason: string) {
   await notifyReturnInProcessStep(orderId);
   await preauthorizeRefundStep(orderId);
   const filed = await createReturnStep(order, reason);
+
+  await sleep("30s"); // in real life: "3d"
+  await sendConsolationPromoStep(orderId);
 
   return { orderId, returnId: filed.id };
 }
@@ -42,4 +46,10 @@ async function createReturnStep(order: Order, reason: string): Promise<Return> {
     })),
     reason,
   });
+}
+async function sendConsolationPromoStep(orderId: string): Promise<void> {
+  "use step";
+  console.log(
+    `[returnFlow] 🎁 sent a 10% off code to the customer for order ${orderId}`,
+  );
 }
